@@ -14,6 +14,9 @@
 
 const inquirer = require('inquirer')
 const inquirerPerguntas = require('./inquirerPerguntas')
+const fs = require('fs')
+
+let dbPetShop = require('./dbPetShop.json')
 
 function Pet(nome, raca, nomeDoDono) {
     this.id = new Date().getTime(),
@@ -30,17 +33,51 @@ function petShop(resposta) {
         inquirer.prompt(inquirerPerguntas.cadastrarPet)
             .then((resposta) => {
                 const { nome, raca, nomeDoDono } = resposta;
-                let pet = new Pet(nome, raca, nomeDoDono)
+                const pet = new Pet(nome, raca, nomeDoDono)
                 console.log(pet)
+                dbPetShop.push(pet)
+                dbPetShop = JSON.stringify(dbPetShop)
+                fs.writeFileSync('dbPetShop.json', dbPetShop)
             })
-
     }
 
     if (resposta.opcao === 1) { // Listar Pets
-
+        console.log(dbPetShop)
     }
 
     if (resposta.opcao === 2) { // Buscar Pet por Nome
+        inquirer.prompt(inquirerPerguntas.buscaPorNome)
+                .then((resposta) => {
+                    let petEncontrado = []
+                    dbPetShop.forEach(elementoDbPetShop => {
+                        if (resposta.nomeInformado.toLowerCase() == elementoDbPetShop.nome.toLowerCase()) {
+                            petEncontrado.push(elementoDbPetShop)
+                        }
+                    });
+                    if (petEncontrado == "") {
+                        console.log("Nenhum Pet encontrado com o nome informado")
+                    } else {
+                        petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
+                            console.log(`- - Encontrado(s) ${petEncontrado.length} Pet(s) com o nome informado - -`)
+                            console.log(`${indexElemento+1} / ${petEncontrado.length}`)
 
+                            for (propriedade in elementoPetEncontrado) {
+                                console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
+                            }
+                            console.log('- - - - - - - - - - - - - - - ')
+                        });
+                        
+                        // console.log(`- - Encontrado(s) ${petEncontrado.length} Pet(s) com o nome informado - -`)
+                        // for (i=0; i < petEncontrado.length; i++){
+                        //     console.log(`${i+1} / ${petEncontrado.length}: `)
+                        //     for (dado in petEncontrado[i]) {
+                        //         // console.log(petEncontrado)
+                        //         console.log(`${dado}: ${petEncontrado[i][dado]}`)
+                        //     }
+                        //     console.log('- - - - - - - - - - - - - - - ')
+                        // }
+                        
+                    }
+                })
     }
 }

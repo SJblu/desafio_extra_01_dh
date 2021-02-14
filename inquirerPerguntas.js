@@ -34,7 +34,12 @@ const inquirerPerguntas = {
             name: 'nomeDoDono',
             message: "Nome do Dono: "
         }
-    ]
+    ],
+    buscaPorNome: {
+        type: 'input',
+        name: 'nomeInformado',
+        message: 'Informe o nome do Pet: '
+    }
 }
 
 module.exports = inquirerPerguntas
