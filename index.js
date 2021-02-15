@@ -16,20 +16,28 @@ const inquirer = require('inquirer')
 const inquirerPerguntas = require('./inquirerPerguntas')
 const fs = require('fs')
 
+
+// verificar se o arquivo existe; caso não, cria vazio
+if (!fs.existsSync('./dbPetShop.json')) {
+    fs.writeFileSync('dbPetShop.json', "[]")
+}
 let dbPetShop = require('./dbPetShop.json')
 
+// construtor para os Pets
 function Pet(nome, raca, nomeDoDono) {
-    this.id = new Date().getTime(),
+    this.id = new Date().getTime(), // id gerado automaticamente com base no momento atual; sempre diferente
         this.nome = nome,
         this.raca = raca,
         this.nomeDoDono = nomeDoDono
 }
 
+
 inquirer.prompt(inquirerPerguntas.listaPrincipal).then(petShop)
+
 
 function petShop(resposta) {
     if (resposta.opcao === 0) { // Cadastrar Pet
-        
+
         inquirer.prompt(inquirerPerguntas.cadastrarPet)
             .then((resposta) => {
                 const { nome, raca, nomeDoDono } = resposta;
@@ -42,11 +50,14 @@ function petShop(resposta) {
     }
 
     if (resposta.opcao === 1) { // Listar Pets
-        console.log(dbPetShop)
+        dbPetShop == "" ? console.log("Nenhum Pet cadastrado") : console.log(dbPetShop)
     }
 
     if (resposta.opcao === 2) { // Buscar Pet por Nome
-        inquirer.prompt(inquirerPerguntas.buscaPorNome)
+        if (dbPetShop == "") {
+            console.log("Nenhum Pet cadastrado")
+        } else {
+            inquirer.prompt(inquirerPerguntas.buscaPorNome)
                 .then((resposta) => {
                     let petEncontrado = []
                     dbPetShop.forEach(elementoDbPetShop => {
@@ -59,25 +70,15 @@ function petShop(resposta) {
                     } else {
                         petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
                             console.log(`- - Encontrado(s) ${petEncontrado.length} Pet(s) com o nome informado - -`)
-                            console.log(`${indexElemento+1} / ${petEncontrado.length}`)
+                            console.log(`${indexElemento + 1} / ${petEncontrado.length}`)
 
                             for (propriedade in elementoPetEncontrado) {
                                 console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
                             }
                             console.log('- - - - - - - - - - - - - - - ')
                         });
-                        
-                        // console.log(`- - Encontrado(s) ${petEncontrado.length} Pet(s) com o nome informado - -`)
-                        // for (i=0; i < petEncontrado.length; i++){
-                        //     console.log(`${i+1} / ${petEncontrado.length}: `)
-                        //     for (dado in petEncontrado[i]) {
-                        //         // console.log(petEncontrado)
-                        //         console.log(`${dado}: ${petEncontrado[i][dado]}`)
-                        //     }
-                        //     console.log('- - - - - - - - - - - - - - - ')
-                        // }
-                        
                     }
                 })
+        }
     }
 }
