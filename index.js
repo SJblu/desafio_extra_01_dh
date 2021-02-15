@@ -24,8 +24,9 @@ if (!fs.existsSync('./dbPetShop.json')) {
 let dbPetShop = require('./dbPetShop.json')
 
 // construtor para os Pets
-function Pet(nome, raca, nomeDoDono) {
-    this.id = new Date().getTime(), // id gerado automaticamente com base no momento atual; sempre diferente
+function Pet(id, nome, raca, nomeDoDono) {
+    // this.id = new Date().getTime(), // id gerado automaticamente com base no momento atual; sempre diferente
+        this.id = id,
         this.nome = nome,
         this.raca = raca,
         this.nomeDoDono = nomeDoDono
@@ -41,7 +42,13 @@ function petShop(resposta) {
         inquirer.prompt(inquirerPerguntas.cadastrarPet)
             .then((resposta) => {
                 const { nome, raca, nomeDoDono } = resposta;
-                const pet = new Pet(nome, raca, nomeDoDono)
+                let id = 0
+                if (dbPetShop.length > 0) {
+                    id = dbPetShop[dbPetShop.length-1].id + 1
+                } else {
+                    id = 1
+                }
+                const pet = new Pet(id, nome, raca, nomeDoDono)
                 console.log(pet)
                 dbPetShop.push(pet)
                 dbPetShop = JSON.stringify(dbPetShop)
@@ -50,11 +57,17 @@ function petShop(resposta) {
     }
 
     if (resposta.opcao === 1) { // Listar Pets
-        dbPetShop == "" ? console.log("Nenhum Pet cadastrado") : console.log(dbPetShop)
+        if (dbPetShop.length < 1) {
+            console.log("Nenhum Pet cadastrado")
+        } else {
+            dbPetShop.forEach(((elemento, indexElemento) => {
+                console.log(`${indexElemento+1} ==> ID: ${elemento.id} | Pet: ${elemento.nome} | Raca: ${elemento.raca} | Nome do Dono: ${elemento.nomeDoDono}`)
+            }))
+        }
     }
 
     if (resposta.opcao === 2) { // Buscar Pet por Nome
-        if (dbPetShop == "") {
+        if (dbPetShop < 1) {
             console.log("Nenhum Pet cadastrado")
         } else {
             inquirer.prompt(inquirerPerguntas.buscaPorNome)
@@ -65,7 +78,7 @@ function petShop(resposta) {
                             petEncontrado.push(elementoDbPetShop)
                         }
                     });
-                    if (petEncontrado == "") {
+                    if (petEncontrado < 1) {
                         console.log("Nenhum Pet encontrado com o nome informado")
                     } else {
                         petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
