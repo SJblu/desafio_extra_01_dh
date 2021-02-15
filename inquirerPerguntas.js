@@ -9,12 +9,16 @@ const inquirerPerguntas = {
                 value: 0
             },
             {
-                name: 'Listar todos os pets cadastrados',
+                name: 'Listar todos os Pets cadastrados',
                 value: 1
             },
             {
-                name: 'Buscar pet por nome',
+                name: 'Buscar Pet por nome',
                 value: 2
+            },
+            {
+                name: 'Deletar Pet cadastrado',
+                value: 3
             }
         ]
     },
@@ -22,23 +26,28 @@ const inquirerPerguntas = {
         {
             type: 'input',
             name: 'nome',
-            message: "Nome do Pet: "
+            message: "Nome do Pet:"
         },
         {
             type: 'input',
             name: 'raca',
-            message: "Raca: "
+            message: "Raca:"
         },
         {
             type: 'input',
             name: 'nomeDoDono',
-            message: "Nome do Dono: "
+            message: "Nome do Dono:"
         }
     ],
     buscaPorNome: {
         type: 'input',
         name: 'nomeInformado',
-        message: 'Informe o nome do Pet: '
+        message: 'Informe o nome do Pet:'
+    },
+    deletarPet: {
+        type: 'number',
+        name: 'idInformado',
+        message: 'ID do Pet que será deletado:'
     }
 }
 

@@ -26,72 +26,92 @@ let dbPetShop = require('./dbPetShop.json')
 // construtor para os Pets
 function Pet(id, nome, raca, nomeDoDono) {
     // this.id = new Date().getTime(), // id gerado automaticamente com base no momento atual; sempre diferente
-        this.id = id,
+    this.id = id,
         this.nome = nome,
         this.raca = raca,
         this.nomeDoDono = nomeDoDono
 }
 
 
-inquirer.prompt(inquirerPerguntas.listaPrincipal).then(petShop)
-
-
-function petShop(resposta) {
-    if (resposta.opcao === 0) { // Cadastrar Pet
-
-        inquirer.prompt(inquirerPerguntas.cadastrarPet)
-            .then((resposta) => {
-                const { nome, raca, nomeDoDono } = resposta;
-                let id = 0
-                if (dbPetShop.length > 0) {
-                    id = dbPetShop[dbPetShop.length-1].id + 1
-                } else {
-                    id = 1
-                }
-                const pet = new Pet(id, nome, raca, nomeDoDono)
-                console.log(pet)
-                dbPetShop.push(pet)
-                dbPetShop = JSON.stringify(dbPetShop)
-                fs.writeFileSync('dbPetShop.json', dbPetShop)
-            })
-    }
-
-    if (resposta.opcao === 1) { // Listar Pets
-        if (dbPetShop.length < 1) {
-            console.log("Nenhum Pet cadastrado")
-        } else {
-            dbPetShop.forEach(((elemento, indexElemento) => {
-                console.log(`${indexElemento+1} ==> ID: ${elemento.id} | Pet: ${elemento.nome} | Raca: ${elemento.raca} | Nome do Dono: ${elemento.nomeDoDono}`)
-            }))
-        }
-    }
-
-    if (resposta.opcao === 2) { // Buscar Pet por Nome
-        if (dbPetShop < 1) {
-            console.log("Nenhum Pet cadastrado")
-        } else {
-            inquirer.prompt(inquirerPerguntas.buscaPorNome)
+inquirer
+    .prompt(inquirerPerguntas.listaPrincipal)
+    .then(resposta => {
+        if (resposta.opcao === 0) { // Cadastrar Pet
+            inquirer.prompt(inquirerPerguntas.cadastrarPet)
                 .then((resposta) => {
-                    let petEncontrado = []
-                    dbPetShop.forEach(elementoDbPetShop => {
-                        if (resposta.nomeInformado.toLowerCase() == elementoDbPetShop.nome.toLowerCase()) {
-                            petEncontrado.push(elementoDbPetShop)
-                        }
-                    });
-                    if (petEncontrado < 1) {
-                        console.log("Nenhum Pet encontrado com o nome informado")
-                    } else {
-                        petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
-                            console.log(`- - Encontrado(s) ${petEncontrado.length} Pet(s) com o nome informado - -`)
-                            console.log(`${indexElemento + 1} / ${petEncontrado.length}`)
-
-                            for (propriedade in elementoPetEncontrado) {
-                                console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
-                            }
-                            console.log('- - - - - - - - - - - - - - - ')
-                        });
-                    }
+                    const { nome, raca, nomeDoDono } = resposta;
+                    let id = 1
+                    if (dbPetShop.length > 0) { id = dbPetShop[dbPetShop.length - 1].id + 1 }
+                    const pet = new Pet(id, nome, raca, nomeDoDono)
+                    // console.log(pet)
+                    console.log(`Registro para o pet ${nome} criado com sucesso`)
+                    dbPetShop.push(pet)
+                    dbPetShop = JSON.stringify(dbPetShop)
+                    fs.writeFileSync('dbPetShop.json', dbPetShop)
                 })
         }
-    }
-}
+
+        if (resposta.opcao === 1) { // Listar Pets
+            if (dbPetShop.length < 1) {
+                console.log("Nenhum pet cadastrado")
+            } else {
+                dbPetShop.forEach(((elemento, indexElemento) => {
+                    console.log(`${indexElemento + 1} ==> ID: ${elemento.id} | Pet: ${elemento.nome} | Raca: ${elemento.raca} | Nome do Dono: ${elemento.nomeDoDono}`)
+                }))
+            }
+        }
+
+        if (resposta.opcao === 2) { // Buscar Pet por Nome
+            if (dbPetShop < 1) {
+                console.log("Nenhum pet cadastrado")
+            } else {
+                inquirer
+                    .prompt(inquirerPerguntas.buscaPorNome)
+                    .then((resposta) => {
+                        let petEncontrado = []
+                        dbPetShop.forEach(elementoDbPetShop => {
+                            if (resposta.nomeInformado.toLowerCase() == elementoDbPetShop.nome.toLowerCase()) {
+                                petEncontrado.push(elementoDbPetShop)
+                            }
+                        });
+                        if (petEncontrado < 1) {
+                            console.log("Nenhum pet encontrado com o nome informado")
+                        } else {
+                            console.log(`- - Encontrado(s) ${petEncontrado.length} pet(s) com o nome informado - -`)
+                            petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
+                                for (propriedade in elementoPetEncontrado) {
+                                    console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
+                                }
+                                console.log('- - - - - - - - - - - - - - - ')
+                            });
+                        }
+                    })
+            }
+        }
+
+        if (resposta.opcao === 3) { // Deletar Pet Cadastrado
+            if (dbPetShop < 1) {
+                console.log("Nenhum pet cadastrado")
+            } else {
+                inquirer
+                    .prompt(inquirerPerguntas.deletarPet)
+                    .then(resposta => {
+                        if (Number.isNaN(resposta.idInformado)) {
+                            console.log("ID inválido")
+                        } else {
+                            let localizado = false
+                            dbPetShop.forEach((elemento, indexElemento) => {
+                                if (elemento.id === resposta.idInformado) {
+                                    dbPetShop.splice(indexElemento, 1)
+                                    console.log(`Pet ${elemento.nome} com ID ${resposta.idInformado} foi excluido`)
+                                    dbPetShop = JSON.stringify(dbPetShop)
+                                    fs.writeFileSync('dbPetShop.json', dbPetShop)
+                                    localizado = true
+                                }
+                            });
+                            if (!localizado) { console.log(`Nenhum registro com ID ${resposta.idInformado} foi localizado`) }
+                        }
+                    })
+            }
+        }
+    })
