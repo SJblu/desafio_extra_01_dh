@@ -19,6 +19,10 @@ const inquirerPerguntas = {
             {
                 name: 'Deletar Pet cadastrado',
                 value: 3
+            },
+            {
+                name: 'Sair do Programa',
+                value: 4
             }
         ]
     },
@@ -48,6 +52,10 @@ const inquirerPerguntas = {
         type: 'number',
         name: 'idInformado',
         message: 'ID do Pet que será deletado:'
+    },
+    pause: {
+        name: 'pausa',
+        message: 'Aperte Enter para continuar. . .'
     }
 }
 

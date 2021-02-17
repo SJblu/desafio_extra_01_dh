@@ -32,86 +32,116 @@ function Pet(id, nome, raca, nomeDoDono) {
         this.nomeDoDono = nomeDoDono
 }
 
-
-inquirer
-    .prompt(inquirerPerguntas.listaPrincipal)
-    .then(resposta => {
-        if (resposta.opcao === 0) { // Cadastrar Pet
-            inquirer.prompt(inquirerPerguntas.cadastrarPet)
-                .then((resposta) => {
-                    const { nome, raca, nomeDoDono } = resposta;
-                    let id = 1
-                    if (dbPetShop.length > 0) { id = dbPetShop[dbPetShop.length - 1].id + 1 }
-                    const pet = new Pet(id, nome, raca, nomeDoDono)
-                    // console.log(pet)
-                    console.log(`Registro para o pet ${nome} criado com sucesso`)
-                    dbPetShop.push(pet)
-                    dbPetShop = JSON.stringify(dbPetShop)
-                    fs.writeFileSync('dbPetShop.json', dbPetShop)
-                })
-        }
-
-        if (resposta.opcao === 1) { // Listar Pets
-            if (dbPetShop.length < 1) {
-                console.log("Nenhum pet cadastrado")
-            } else {
-                dbPetShop.forEach(((elemento, indexElemento) => {
-                    console.log(`${indexElemento + 1} ==> ID: ${elemento.id} | Pet: ${elemento.nome} | Raca: ${elemento.raca} | Nome do Dono: ${elemento.nomeDoDono}`)
-                }))
-            }
-        }
-
-        if (resposta.opcao === 2) { // Buscar Pet por Nome
-            if (dbPetShop < 1) {
-                console.log("Nenhum pet cadastrado")
-            } else {
-                inquirer
-                    .prompt(inquirerPerguntas.buscaPorNome)
-                    .then((resposta) => {
-                        let petEncontrado = []
-                        dbPetShop.forEach(elementoDbPetShop => {
-                            if (resposta.nomeInformado.toLowerCase() == elementoDbPetShop.nome.toLowerCase()) {
-                                petEncontrado.push(elementoDbPetShop)
-                            }
-                        });
-                        if (petEncontrado < 1) {
-                            console.log("Nenhum pet encontrado com o nome informado")
-                        } else {
-                            console.log(`- - Encontrado(s) ${petEncontrado.length} pet(s) com o nome informado - -`)
-                            petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
-                                for (propriedade in elementoPetEncontrado) {
-                                    console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
-                                }
-                                console.log('- - - - - - - - - - - - - - - ')
-                            });
-                        }
-                    })
-            }
-        }
-
-        if (resposta.opcao === 3) { // Deletar Pet Cadastrado
-            if (dbPetShop < 1) {
-                console.log("Nenhum pet cadastrado")
-            } else {
-                inquirer
-                    .prompt(inquirerPerguntas.deletarPet)
-                    .then(resposta => {
-                        if (Number.isNaN(resposta.idInformado)) {
-                            console.log("ID inválido")
-                        } else {
-                            let localizado = false
-                            dbPetShop.forEach((elemento, indexElemento) => {
-                                if (elemento.id === resposta.idInformado) {
-                                    dbPetShop.splice(indexElemento, 1)
-                                    console.log(`Pet ${elemento.nome} com ID ${resposta.idInformado} foi excluido`)
-                                    dbPetShop = JSON.stringify(dbPetShop)
-                                    fs.writeFileSync('dbPetShop.json', dbPetShop)
-                                    localizado = true
-                                }
-                            });
-                            if (!localizado) { console.log(`Nenhum registro com ID ${resposta.idInformado} foi localizado`) }
-                        }
-                    })
-            }
-        }
+// funcao com callback para chamar novamente o menu de perguntas
+function resetaSistema(callback) {
+    inquirer.prompt(inquirerPerguntas.pause).then(() => {
+        console.log("")
+        callback()
     })
+}
+
+
+// funcao principal com perguntas do Inquirer
+const sistemaPetShop = () => {
+    inquirer
+        .prompt(inquirerPerguntas.listaPrincipal)
+        .then(resposta => {
+            if (resposta.opcao === 0) { // Cadastrar Pet
+                inquirer.prompt(inquirerPerguntas.cadastrarPet)
+                    .then((resposta) => {
+                        const { nome, raca, nomeDoDono } = resposta;
+                        let id = 1
+                        if (dbPetShop.length > 0) { id = dbPetShop[dbPetShop.length - 1].id + 1 }
+                        const pet = new Pet(id, nome.trim(), raca.trim(), nomeDoDono.trim())
+                        // console.log(pet)
+                        console.log(`Registro para o pet ${nome.trim()} criado com sucesso`)
+                        dbPetShop.push(pet)
+                        fs.writeFileSync('dbPetShop.json', JSON.stringify(dbPetShop))
+
+                        resetaSistema(sistemaPetShop);
+                    })
+            }
+
+            if (resposta.opcao === 1) { // Listar Pets
+                if (dbPetShop.length < 1) {
+                    console.log("Nenhum pet cadastrado")
+                } else {
+                    dbPetShop.forEach(((elemento, indexElemento) => {
+                        console.log(`${indexElemento + 1} ==> ID: ${elemento.id} | Pet: ${elemento.nome} | Raca: ${elemento.raca} | Nome do Dono: ${elemento.nomeDoDono}`)
+                    }))
+                }
+                
+                resetaSistema(sistemaPetShop);
+            }
+
+            if (resposta.opcao === 2) { // Buscar Pet por Nome
+                if (dbPetShop < 1) {
+                    console.log("Nenhum pet cadastrado")
+                    resetaSistema(sistemaPetShop)
+                } else {
+                    inquirer
+                        .prompt(inquirerPerguntas.buscaPorNome)
+                        .then(resposta => {
+                            let petEncontrado = []
+                            dbPetShop.forEach(elementoDbPetShop => {
+                                if (resposta.nomeInformado.toLowerCase() == elementoDbPetShop.nome.toLowerCase()) {
+                                    petEncontrado.push(elementoDbPetShop)
+                                }
+                            });
+                            if (petEncontrado < 1) {
+                                console.log("Nenhum pet encontrado com o nome informado")
+                                // resetaSistema(sistemaPetShop);
+                            } else {
+                                console.log(`- - Encontrado(s) ${petEncontrado.length} pet(s) com o nome informado - -`)
+                                petEncontrado.forEach((elementoPetEncontrado, indexElemento) => {
+                                    for (propriedade in elementoPetEncontrado) {
+                                        console.log(`${propriedade}: ${elementoPetEncontrado[propriedade]}`)
+                                    }
+                                    console.log('- - - - - - - - - - - - - - - ')
+                                });
+                                
+                            }
+                            resetaSistema(sistemaPetShop);
+                        })
+                }
+            }
+
+            if (resposta.opcao === 3) { // Deletar Pet Cadastrado
+                if (dbPetShop < 1) {
+                    console.log("Nenhum pet cadastrado")
+                    resetaSistema(sistemaPetShop);
+                } else {
+                    inquirer
+                        .prompt(inquirerPerguntas.deletarPet)
+                        .then(resposta => {
+                            if (Number.isNaN(resposta.idInformado)) {
+                                console.log("ID inválido")
+                            } else {
+                                let localizado = false
+                                dbPetShop.forEach((elemento, indexElemento) => {
+                                    if (elemento.id === resposta.idInformado) {
+                                        dbPetShop.splice(indexElemento, 1)
+                                        console.log(`Pet ${elemento.nome} com ID ${resposta.idInformado} foi excluido`)
+                                        fs.writeFileSync('dbPetShop.json', JSON.stringify(dbPetShop))
+                                        localizado = true
+                                    }
+                                });
+                                if (!localizado) { console.log(`Nenhum registro com ID ${resposta.idInformado} foi localizado`) }
+                            }
+
+                            resetaSistema(sistemaPetShop);
+                        })
+                }
+
+            }
+
+            if (resposta.opcao === 4) { // Finaliza programa
+                // apenas finaliza ...
+                console.log("Tenha um Bom Dia :) ")
+            }
+        })
+}
+
+
+// Execução inicial da perguntas
+sistemaPetShop();
