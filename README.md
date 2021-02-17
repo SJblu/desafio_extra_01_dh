@@ -1,6 +1,6 @@
-<h1>Desafio Extra 01 - Digital House</h1>
+<h1>Sistema PetShop</h1>
 
-<h2>Sistema PetShop</h2>
+<h2>Desafio Extra 01 - Digital House</h2>
 <p>Desafio Extra do curso de FullStack Node.js da Digital House.</p>
 <ol>
     <li>Criar um método construtor para criar novos pets (animais). Esse objeto deve conter os atributos:</br>
